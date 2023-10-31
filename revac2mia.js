@@ -13,7 +13,7 @@ const port = 3000;
 mongoose.connect('mongodb://127.0.0.1:27017/revac2mia',
 {   useNewUrlParser: true,
     useUnifiedTopology: true,
-    serverSelectionTimeoutMS : 20000
+    serverSelectionTimeoutMS : 10000
 });
 
 //criando a model do seu projeto
@@ -37,13 +37,25 @@ app.post("/cadastropessoa", async(req, res)=>{
     const cep  = req.body.cep;
     const nascimento = req.body.nascimento
 
+    //verificando se todos os campos foram preenchidos
+    if(nome == null || email == null || endereco == null || numero == null || cep == null || nascimento == null){
+        return res.status(400).json({error: "Preencha todos os campos"})
+    }
+
+    //teste importante da ac
+    const emailExiste = await Pessoa.findOne({email: email})
+
+    if(emailExiste){
+        return res.status(400).json({error: "O email cadastrado já existe"})
+    }
+
     const pessoa = new Pessoa({
-        nome : nome,
-        email : email,
-        endereco : endereco,
-        numero : numero,
-        cep : cep,
-        nascimento : nascimento
+        nome: nome,
+        email: email,
+        endereco: endereco,
+        numero: numero,
+        cep: cep,
+        nascimento: nascimento
     })
 
     try{
@@ -54,8 +66,14 @@ app.post("/cadastropessoa", async(req, res)=>{
     }
 });
 
+//rota de cadastro
 app.get("/", async(req, res)=>{
-    res.sendFile(__dirname + "/index.html");
+    res.sendFile(__dirname + "/cadastropessoa.html");
+})
+
+//rota raiz - inw
+app.get("/", async(req, res)=>{
+    res.sendFile(__dirname + "/index.html");S
 })
 
 //configurando a porta
